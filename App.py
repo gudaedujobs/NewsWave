@@ -6,13 +6,14 @@ from newspaper import Article
 import io
 import nltk
 from googletrans import Translator
-import configparser
-import toml
+
 
 nltk.download('punkt')
 
 st.set_page_config(page_title='NewsWave: News📰 Portal', page_icon='./Meta/app-icon.ico')
-
+sup_lang_val = {"English": 'en', "Hindi": "hi", "Gujarati": 'gu', "Marathi": 'mr', "Bengali": "bn", "Kannada": "kn",
+                "Punjabi": "pa", "Malayalam": "ml", "Tamil": 'ta', "Telugu": 'te'}
+sup_lang_key = {v: k for k, v in sup_lang_val.items()}
 
 def fetch_news_search_topic(topic):
     site = 'https://news.google.com/rss/search?q={}'.format(topic)
@@ -45,15 +46,40 @@ def link_news_translator(n_link, news_lan_code):
                 st.success("Published Date: " + str(news_data.publish_date))
         else:
             news_title = news_data.title
-            header('({}) {}'.format(c, news_title))
-            fetch_news_poster(news_data.top_image)
-            with st.expander(news_title):
-                news_summ = news_data.summary
-                st.markdown(
-                    '''<p style='text-align: justify;'>{}"</p>'''.format(news_summ),
-                    unsafe_allow_html=True)
-            if news_data.publish_date:
-                st.success("Published Date: " + str(news_data.publish_date))
+            lang_code = translator.detect(news_title).lang
+            if lang_code == 'en':
+                header('({}) {}'.format(c, news_title))
+                fetch_news_poster(news_data.top_image)
+                with st.expander(news_title):
+                    news_summ = news_data.summary
+                    st.markdown(
+                        '''<p style='text-align: justify;'>{}"</p>'''.format(news_summ),
+                        unsafe_allow_html=True)
+                    st.markdown("[Click here to read original news....]({})".format(n_link))
+
+                if news_data.publish_date:
+                    st.success("Published Date: " + str(news_data.publish_date))
+            else:
+                news_title_tr = translator.translate(news_title, dest='en')
+                header('({}) {}'.format(c, news_title_tr.text))
+                st.info("Source news is: "+ sup_lang_key[lang_code])
+                fetch_news_poster(news_data.top_image)
+                with st.expander(news_title_tr.text):
+                    news_summ = news_data.summary
+                    if news_summ:
+                        news_sum_tr = translator.translate(news_summ, dest='en')
+                        st.markdown(
+                            '''<p style='text-align: justify;'>{}"</p>'''.format(news_sum_tr.text),
+                            unsafe_allow_html=True)
+                    else:
+                        st.markdown(
+                            '''<p style='text-align: justify;'>Can't able to web-scrap news...</p>''',
+                            unsafe_allow_html=True)
+                    st.markdown("[Click here to read original news....]({})".format(n_link))
+
+                if news_data.publish_date:
+                    st.success("Published Date: " + str(news_data.publish_date))
+
     except Exception as e:
         print(e)
         st.warning("Something went wrong....!")
@@ -148,6 +174,7 @@ def display_news(list_of_news, news_quantity, language):
                 st.success("Published Date: " + news.pubDate.text)
                 if c >= news_quantity:
                     break
+
     except Exception as e:
         print(e)
         st.warning("Something went wrong with scraper, please try again...")
@@ -169,8 +196,6 @@ def run():
     # Language Selection
     supp_lang = ['English', 'Hindi', 'Gujarati', 'Marathi', "Bengali", 'Kannada', 'Punjabi', 'Malayalam', 'Tamil',
                  'Telugu']
-    sup_lang_val = {"English": 'en', "Hindi": "hi", "Gujarati": 'gu', "Marathi": 'mr', "Bengali": "bn", "Kannada": "kn",
-                    "Punjabi": "pa", "Malayalam": "ml", "Tamil": 'ta', "Telugu": 'te'}
     chosen_language = st.radio(
         "Preferred Language",
         supp_lang, horizontal=True)
