@@ -9,6 +9,8 @@ from googletrans import Translator
 
 nltk.download('punkt')
 
+# -*- coding: utf-8 -*-
+
 st.set_page_config(page_title='NewsWave: News📰 Portal', page_icon='./Meta/newspaper.ico')
 sup_lang_val = {"English": 'en', "Hindi": "hi", "Gujarati": 'gu', "Marathi": 'mr', "Kannada": "kn",
                 "Tamil": 'ta', "Telugu": 'te'}
