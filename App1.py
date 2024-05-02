@@ -75,9 +75,6 @@ def display_news(list_of_news, news_quantity, language):
         translator = Translator()
         for news in list_of_news:
             c += 1
-            # st.markdown(f"({c})[ {news.title.text}]({news.link.text})")
-            # st.write('**({}) {}**'.format(c, news.title.text))
-
             news_data = Article(news.link.text)
             try:
                 news_data.download()
